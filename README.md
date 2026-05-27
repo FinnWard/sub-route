@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+This is a small [Next.js](https://nextjs.org) demo for testing whether an App Router app can be served from the `/docs` subpath behind an nginx reverse proxy.
 
-## Getting Started
+## Local app
 
-First, run the development server:
+Run the app directly with Next.js:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000/docs](http://localhost:3000/docs) because the app is configured with `basePath: "/docs"`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Compose nginx proxy test
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This repository includes a two-container stack:
 
-## Learn More
+- `app`: the production Next.js server
+- `nginx`: a reverse proxy that forwards `/docs` to the app without stripping the prefix
 
-To learn more about Next.js, take a look at the following resources:
+Start it with Docker or Podman:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+docker compose up --build
+# or
+podman-compose up --build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Then test:
 
-## Deploy on Vercel
+1. App UI through nginx: [http://localhost:8080/docs](http://localhost:8080/docs)
+2. Names route through nginx: [http://localhost:8080/docs/api/names](http://localhost:8080/docs/api/names)
+3. Direct app container is only exposed to the compose network, not the host
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Useful smoke tests:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+curl -i http://localhost:8080/docs
+curl -i http://localhost:8080/docs/api/names
+```
+
+`/docs/` redirects to `/docs`, which is expected for this Next.js setup.
+
+The server action can be tested from the page UI at `/docs`. It should return the same names list as the route handler.
