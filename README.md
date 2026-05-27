@@ -8,14 +8,14 @@ Run the app directly with Next.js:
 pnpm dev
 ```
 
-Open [http://localhost:3000/docs](http://localhost:3000/docs) because the app is configured with `basePath: "/docs"`.
+Open [http://localhost:3000](http://localhost:3000). The app now runs at the root path.
 
 ## Compose nginx proxy test
 
 This repository includes a two-container stack:
 
 - `app`: the production Next.js server
-- `nginx`: a reverse proxy that forwards `/docs` to the app without stripping the prefix
+- `nginx`: a reverse proxy that exposes the app under `/docs` while stripping that prefix before forwarding to Next.js
 
 Start it with Docker or Podman:
 
@@ -38,6 +38,6 @@ curl -i http://localhost:8080/docs
 curl -i http://localhost:8080/docs/api/names
 ```
 
-`/docs/` redirects to `/docs`, which is expected for this Next.js setup.
+Because Next.js is now configured for the root path, nginx also proxies the app's root-relative assets and API paths such as `/_next/*`, `/api/*`, and `/favicon.ico`.
 
 The server action can be tested from the page UI at `/docs`. It should return the same names list as the route handler.

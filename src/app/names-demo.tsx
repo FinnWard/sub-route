@@ -20,12 +20,18 @@ export function NamesDemo() {
   const [loadingRest, setLoadingRest] = useState(false);
   const [loadingAction, setLoadingAction] = useState(false);
 
+  function getNamesEndpoint() {
+    return window.location.pathname.startsWith("/docs")
+      ? "/docs/api/names"
+      : "/api/names";
+  }
+
   async function loadWithRest() {
     setLoadingRest(true);
     setRestState(initialState);
 
     try {
-      const response = await fetch("/docs/api/names");
+      const response = await fetch(getNamesEndpoint());
 
       if (!response.ok) {
         throw new Error(`REST request failed with status ${response.status}`);
